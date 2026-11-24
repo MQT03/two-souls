@@ -15,6 +15,7 @@ class DecisionSystem(SimulationSystem):
     def update(self, tick: int) -> None:
         for character in self._world.characters:
             character.decision = self._choose_decision(character)
+            character.decision_revision += 1
 
     def _choose_decision(self, character):
         needs = character.needs

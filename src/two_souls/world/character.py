@@ -1,11 +1,11 @@
-from two_souls.world.character_decision import CharacterDecision
 from dataclasses import dataclass, field
 
-from two_souls.world.position import Position
+from two_souls.world.character_action import CharacterAction
+from two_souls.world.character_decision import CharacterDecision
+from two_souls.world.character_state import CharacterState
 from two_souls.world.needs import Needs
 from two_souls.world.personality import Personality
-from two_souls.world.character_state import CharacterState
-
+from two_souls.world.position import Position
 
 @dataclass
 class Character:
@@ -19,3 +19,5 @@ class Character:
     personality: Personality = field(default_factory=Personality)
     state: CharacterState = CharacterState.IDLE
     decision: CharacterDecision = CharacterDecision.IDLE
+    current_action: CharacterAction | None = None
+    decision_revision: int = 0

@@ -10,3 +10,6 @@ class CharacterState(str, Enum):
     EATING = "eating"
     WORKING = "working"
     SOCIALIZING = "socializing"
+    EXPLORING = "exploring"
+    SEEKING_FOOD = "seeking_food"
+    SEEKING_WATER = "seeking_water"

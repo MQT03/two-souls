@@ -3,7 +3,7 @@ import unittest
 from two_souls.simulation.session import create_new_game
 from two_souls.world.character_decision import CharacterDecision
 from two_souls.world.character_state import CharacterState
-
+from two_souls.simulation.systems.decision_system import DecisionSystem
 
 class TestDecisionSystem(unittest.TestCase):
 
@@ -64,7 +64,14 @@ class TestDecisionSystem(unittest.TestCase):
         )
 
     def test_decision_does_not_change_current_state(self):
-        self.advance_decisions()
+        decision_system = DecisionSystem(self.session.world)
+
+        decision_system.update(5)
+
+        self.assertEqual(
+            self.adam.decision,
+            CharacterDecision.WORK
+        )
 
         self.assertEqual(
             self.adam.state,

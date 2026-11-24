@@ -3,12 +3,13 @@ from dataclasses import dataclass
 
 from two_souls.simulation.engine import SimulationEngine
 from two_souls.simulation.runner import SimulationRunner
+from two_souls.simulation.systems.action_system import ActionSystem
+from two_souls.simulation.systems.decision_system import DecisionSystem
 from two_souls.simulation.systems.needs_system import NeedsSystem
 from two_souls.world.character import Character
+from two_souls.world.personality import Personality
 from two_souls.world.position import Position
 from two_souls.world.world import World
-from two_souls.simulation.systems.decision_system import DecisionSystem
-from two_souls.world.personality import Personality
 
 @dataclass
 class GameSession:
@@ -57,6 +58,7 @@ def create_new_game() -> GameSession:
     DecisionSystem(world),
     update_interval=5
     )
+    engine.add_system(ActionSystem(world))
     runner = SimulationRunner(
         engine=engine,
         time_multiplier=1.0
