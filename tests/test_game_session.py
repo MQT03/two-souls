@@ -36,6 +36,12 @@ class TestGameSession(unittest.TestCase):
 
         self.assertAlmostEqual(adam.needs.hunger, 0.05)
         self.assertAlmostEqual(lina.needs.hunger, 0.05)
+        
+    def test_runner_advances_session_engine(self):
+        ticks = self.session.runner.update(1.0)
+
+        self.assertEqual(ticks, 1)
+        self.assertEqual(self.session.engine.tick_count, 1)
 
 
 if __name__ == "__main__":
