@@ -20,3 +20,6 @@ class World:
 
     def get_character(self, character_id: str) -> Character | None:
         return self._characters.get(character_id)
+    @property
+    def characters(self) -> tuple[Character, ...]:
+        return tuple(self._characters.values())
