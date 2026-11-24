@@ -141,3 +141,27 @@ The architecture should support future expansion, including:
 - More complex decision-making.
 - Additional world simulation systems.
 - Optional local AI model integration.
+
+
+## 8. Time and Simulation Model
+
+Two Souls uses a Fixed Simulation Tick model.
+
+### Time Concepts
+
+- Real Time: Actual elapsed time on the user's device.
+- Game Time: Time progression inside the simulated world.
+- Simulation Tick: A fixed unit used to advance the simulation.
+
+### Simulation Tick Configuration
+
+- Each Simulation Tick represents one Game Minute.
+- Game Time can advance faster than Real Time using a configurable time multiplier.
+- Simulation updates are independent of rendering FPS.
+- The simulation must support offline progression.
+
+### System Update Strategy
+
+Not every system needs to update on every Simulation Tick.
+
+Systems may use scheduled updates or event-driven processing depending on their responsibilities and performance requirements.
