@@ -6,6 +6,8 @@ from two_souls.simulation.systems.decision_system import DecisionSystem
 from two_souls.world.character_action import CharacterAction
 from two_souls.world.character_decision import CharacterDecision
 from two_souls.world.character_state import CharacterState
+from two_souls.events.event_bus import EventBus
+from two_souls.events.character_events import CharacterActionCompleted
 
 class TestActionSystem(unittest.TestCase):
 
@@ -14,7 +16,8 @@ class TestActionSystem(unittest.TestCase):
         self.world = self.session.world
 
         self.adam = self.world.get_character("adam-001")
-        self.action_system = ActionSystem(self.world)
+        self.event_bus = EventBus()
+        self.action_system = ActionSystem(self.world, self.event_bus)
 
     def test_work_decision_starts_work_action(self):
         self.adam.decision = CharacterDecision.WORK
@@ -266,6 +269,96 @@ class TestActionSystem(unittest.TestCase):
         self.assertEqual(
             self.adam.state,
             CharacterState.WORKING
+        )
+
+    def test_action_completion_publishes_event(self):
+        received_events = []
+
+        self.event_bus.subscribe(
+            CharacterActionCompleted,
+            received_events.append
+        )
+
+        self.adam.decision = CharacterDecision.WORK
+        self.adam.decision_revision = 1
+
+        self.action_system.update(1)
+
+        action = self.adam.current_action
+
+        for tick in range(2, action.duration_ticks + 1):
+            self.action_system.update(tick)
+
+        self.assertEqual(len(received_events), 1)
+
+        event = received_events[0]
+
+        self.assertEqual(event.character_id, self.adam.character_id)
+        self.assertEqual(event.decision, CharacterDecision.WORK)
+        self.assertEqual(event.tick, action.duration_ticks)
+
+
+    def test_action_completion_event_is_published_only_once(self):
+        received_events = []
+
+        self.event_bus.subscribe(
+            CharacterActionCompleted,
+            received_events.append
+        )
+
+        self.adam.decision = CharacterDecision.WORK
+        self.adam.decision_revision = 1
+
+        for tick in range(1, 150):
+            self.action_system.update(tick)
+
+        self.assertEqual(len(received_events), 1)
+
+
+    def test_interrupted_action_does_not_publish_completion_event(self):
+        received_events = []
+
+        self.event_bus.subscribe(
+            CharacterActionCompleted,
+            received_events.append
+        )
+
+        self.adam.decision = CharacterDecision.WORK
+        self.adam.decision_revision = 1
+
+        self.action_system.update(1)
+        self.action_system.update(2)
+
+        self.adam.decision = CharacterDecision.REST
+        self.adam.decision_revision += 1
+
+        self.action_system.update(3)
+
+        self.assertEqual(received_events, [])
+
+
+    def test_event_contains_actual_completion_tick(self):
+        received_events = []
+
+        self.event_bus.subscribe(
+            CharacterActionCompleted,
+            received_events.append
+        )
+
+        self.adam.decision = CharacterDecision.SOCIALIZE
+        self.adam.decision_revision = 1
+
+        self.action_system.update(40)
+
+        action = self.adam.current_action
+
+        for tick in range(41, 40 + action.duration_ticks):
+            self.action_system.update(tick)
+
+        self.assertEqual(len(received_events), 1)
+        self.assertEqual(
+            received_events[0].tick,
+            40 + action.duration_ticks - 1
         )
 
 if __name__ == "__main__":

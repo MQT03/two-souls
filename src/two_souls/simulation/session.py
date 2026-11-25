@@ -1,6 +1,7 @@
 
 from dataclasses import dataclass
 
+from two_souls.events.event_bus import EventBus
 from two_souls.simulation.engine import SimulationEngine
 from two_souls.simulation.runner import SimulationRunner
 from two_souls.simulation.systems.action_system import ActionSystem
@@ -11,6 +12,7 @@ from two_souls.world.personality import Personality
 from two_souls.world.position import Position
 from two_souls.world.world import World
 
+
 @dataclass
 class GameSession:
     """Holds the main components of an active game session."""
@@ -18,12 +20,14 @@ class GameSession:
     world: World
     engine: SimulationEngine
     runner: SimulationRunner
+    event_bus: EventBus
 
 
 def create_new_game() -> GameSession:
     """Creates and initializes a new game session."""
 
     world = World()
+    event_bus = EventBus()
 
     adam = Character(
         character_id="adam-001",
@@ -53,12 +57,14 @@ def create_new_game() -> GameSession:
     world.add_character(lina)
 
     engine = SimulationEngine()
+
     engine.add_system(NeedsSystem(world))
     engine.add_system(
-    DecisionSystem(world),
-    update_interval=5
+        DecisionSystem(world),
+        update_interval=5
     )
-    engine.add_system(ActionSystem(world))
+    engine.add_system(ActionSystem(world, event_bus))
+
     runner = SimulationRunner(
         engine=engine,
         time_multiplier=1.0
@@ -67,5 +73,6 @@ def create_new_game() -> GameSession:
     return GameSession(
         world=world,
         engine=engine,
-        runner=runner
+        runner=runner,
+        event_bus=event_bus
     )

@@ -1,6 +1,7 @@
 
 import unittest
 
+from two_souls.world.resource_type import ResourceType
 from two_souls.world.character import Character
 from two_souls.world.position import Position
 from two_souls.world.needs import Needs
@@ -70,5 +71,29 @@ class TestCharacterModel(unittest.TestCase):
 
         with self.assertRaises(ValueError):
             personality.kindness = -10
+    def test_characters_have_independent_inventories(self):
+        adam = Character(
+            character_id="adam",
+            name="Adam",
+            position=Position(10, 20)
+        )
+
+        lina = Character(
+            character_id="lina",
+            name="Lina",
+            position=Position(12, 20)
+        )
+
+        adam.inventory.add(ResourceType.FOOD, 5)
+
+        self.assertEqual(
+            adam.inventory.quantity(ResourceType.FOOD),
+            5
+        )
+
+        self.assertEqual(
+            lina.inventory.quantity(ResourceType.FOOD),
+            0
+        )
 if __name__ == "__main__":
     unittest.main()

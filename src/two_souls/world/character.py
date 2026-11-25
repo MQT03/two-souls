@@ -6,6 +6,7 @@ from two_souls.world.character_state import CharacterState
 from two_souls.world.needs import Needs
 from two_souls.world.personality import Personality
 from two_souls.world.position import Position
+from two_souls.world.inventory import Inventory
 
 @dataclass
 class Character:
@@ -21,3 +22,4 @@ class Character:
     decision: CharacterDecision = CharacterDecision.IDLE
     current_action: CharacterAction | None = None
     decision_revision: int = 0
+    inventory: Inventory = field(default_factory=Inventory)

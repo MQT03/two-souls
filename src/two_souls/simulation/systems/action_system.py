@@ -5,6 +5,8 @@ from two_souls.world.character_decision import CharacterDecision
 from two_souls.world.character_state import CharacterState
 from two_souls.world.world import World
 from two_souls.world.character import Character
+from two_souls.events.event_bus import EventBus
+from two_souls.events.character_events import CharacterActionCompleted
 
 class ActionSystem(SimulationSystem):
     """Manages the execution of character activities."""
@@ -30,14 +32,15 @@ class ActionSystem(SimulationSystem):
         ),
     }
 
-    def __init__(self, world: World) -> None:
+    def __init__(self, world: World, event_bus: EventBus) -> None:
         self._world = world
+        self._event_bus = event_bus
 
     def update(self, tick: int) -> None:
         for character in self._world.characters:
-            self._update_character(character)
+            self._update_character(character, tick)
 
-    def _update_character(self, character: Character) -> None:
+    def _update_character(self, character: Character,tick: int) -> None:
         decision = character.decision
         action = character.current_action
 
@@ -74,3 +77,11 @@ class ActionSystem(SimulationSystem):
         if action.advance():
             action.decision_revision = character.decision_revision
             character.state = CharacterState.IDLE
+
+            self._event_bus.publish(
+                CharacterActionCompleted(
+                    character_id=character.character_id,
+                    decision=action.decision,
+                    tick=tick
+                )
+            )
