@@ -1,10 +1,11 @@
 from two_souls.simulation.system import SimulationSystem
 from two_souls.world.character_decision import CharacterDecision
+from two_souls.world.agent import Agent
 from two_souls.world.world import World
 
 
 class DecisionSystem(SimulationSystem):
-    """Evaluates character needs and personality to select decisions."""
+    """Evaluates physical needs and AgentMind personality to select decisions."""
 
     NEED_THRESHOLD = 60.0
     ENERGY_THRESHOLD = 40.0
@@ -13,23 +14,24 @@ class DecisionSystem(SimulationSystem):
         self._world = world
 
     def update(self, tick: int) -> None:
-        for character in self._world.characters:
-            character.decision = self._choose_decision(character)
-            character.decision_revision += 1
+        for agent in self._world.agents:
+            agent.mind.decision = self._choose_decision(agent)
+            agent.mind.decision_revision += 1
 
-    def _choose_decision(self, character):
+    def _choose_decision(self, agent: Agent) -> CharacterDecision:
+        character = agent.character
         needs = character.needs
-        personality = character.personality
+        personality = agent.mind.personality
 
         scores = {
             CharacterDecision.WORK:
-                20.0 + personality.diligence * 0.6,
+                20.0 + personality.numeric_value("diligence") * 0.6,
 
             CharacterDecision.SOCIALIZE:
-                20.0 + personality.sociability * 0.6,
+                20.0 + personality.numeric_value("sociability") * 0.6,
 
             CharacterDecision.EXPLORE:
-                20.0 + personality.curiosity * 0.6,
+                20.0 + personality.numeric_value("curiosity") * 0.6,
         }
 
         if needs.energy <= self.ENERGY_THRESHOLD:

@@ -82,7 +82,8 @@ class Game:
 
         y_position = 100
 
-        for character in self._session.world.characters:
+        for agent in self._session.world.agents:
+            character = agent.character
             character_text = (
                 f"{character.name} | "
                 f"State: {character.state.value} | "

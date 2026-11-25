@@ -7,8 +7,13 @@ from two_souls.simulation.runner import SimulationRunner
 from two_souls.simulation.systems.action_system import ActionSystem
 from two_souls.simulation.systems.decision_system import DecisionSystem
 from two_souls.simulation.systems.needs_system import NeedsSystem
-from two_souls.world.character import Character
-from two_souls.world.personality import Personality
+from two_souls.intelligence.agent_mind import Motivation, Value
+from two_souls.intelligence.personality import (
+    TraitDefinition,
+    TraitInstance,
+)
+from two_souls.world.agent_factory import AgentFactory
+from two_souls.world.agent_profile import AgentProfile
 from two_souls.world.position import Position
 from two_souls.world.world import World
 
@@ -28,33 +33,50 @@ def create_new_game() -> GameSession:
 
     world = World()
     event_bus = EventBus()
+    agent_factory = AgentFactory()
 
-    adam = Character(
-        character_id="adam-001",
+    adam = agent_factory.create(AgentProfile(
+        agent_id="adam-001",
         name="Adam",
         position=Position(10, 20),
-        personality=Personality(
-            sociability=35,
-            kindness=60,
-            curiosity=45,
-            diligence=85
-        )
-    )
+        traits={
+            name: TraitInstance(
+                TraitDefinition(name, float, minimum=0.0, maximum=100.0),
+                value,
+            )
+            for name, value in {
+                "sociability": 35.0,
+                "kindness": 60.0,
+                "curiosity": 45.0,
+                "diligence": 85.0,
+            }.items()
+        },
+        values={"diligence": Value("diligence", 0.8)},
+        motivations={"contribution": Motivation("contribution", 0.7)},
+    ))
 
-    lina = Character(
-        character_id="lina-001",
+    lina = agent_factory.create(AgentProfile(
+        agent_id="lina-001",
         name="Lina",
         position=Position(12, 20),
-        personality=Personality(
-            sociability=85,
-            kindness=80,
-            curiosity=75,
-            diligence=45
-        )
-    )
+        traits={
+            name: TraitInstance(
+                TraitDefinition(name, float, minimum=0.0, maximum=100.0),
+                value,
+            )
+            for name, value in {
+                "sociability": 85.0,
+                "kindness": 80.0,
+                "curiosity": 75.0,
+                "diligence": 45.0,
+            }.items()
+        },
+        values={"kindness": Value("kindness", 0.8)},
+        motivations={"belonging": Motivation("belonging", 0.7)},
+    ))
 
-    world.add_character(adam)
-    world.add_character(lina)
+    world.add_agent(adam)
+    world.add_agent(lina)
 
     engine = SimulationEngine()
 

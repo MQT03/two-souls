@@ -4,6 +4,7 @@ import unittest
 from two_souls.simulation.engine import SimulationEngine
 from two_souls.simulation.systems.needs_system import NeedsSystem
 from two_souls.world.character import Character
+from two_souls.world.agent import Agent
 from two_souls.world.character_state import CharacterState
 from two_souls.world.position import Position
 from two_souls.world.world import World
@@ -20,7 +21,7 @@ class TestNeedsSystem(unittest.TestCase):
             Position(10, 20)
         )
 
-        self.world.add_character(self.adam)
+        self.world.add_agent(Agent(self.adam))
 
         self.engine = SimulationEngine()
         self.engine.add_system(NeedsSystem(self.world))

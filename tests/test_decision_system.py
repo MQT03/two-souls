@@ -10,8 +10,8 @@ class TestDecisionSystem(unittest.TestCase):
     def setUp(self):
         self.session = create_new_game()
 
-        self.adam = self.session.world.get_character("adam-001")
-        self.lina = self.session.world.get_character("lina-001")
+        self.adam = self.session.world.get_agent("adam-001")
+        self.lina = self.session.world.get_agent("lina-001")
 
     def advance_decisions(self):
         for _ in range(5):
@@ -21,7 +21,7 @@ class TestDecisionSystem(unittest.TestCase):
         self.advance_decisions()
 
         self.assertEqual(
-            self.adam.decision,
+            self.adam.mind.decision,
             CharacterDecision.WORK
         )
 
@@ -29,37 +29,37 @@ class TestDecisionSystem(unittest.TestCase):
         self.advance_decisions()
 
         self.assertEqual(
-            self.lina.decision,
+            self.lina.mind.decision,
             CharacterDecision.SOCIALIZE
         )
 
     def test_hunger_overrides_personality_preference(self):
-        self.adam.needs.hunger = 80
+        self.adam.character.needs.hunger = 80
 
         self.advance_decisions()
 
         self.assertEqual(
-            self.adam.decision,
+            self.adam.mind.decision,
             CharacterDecision.SEEK_FOOD
         )
 
     def test_thirst_overrides_personality_preference(self):
-        self.lina.needs.thirst = 80
+        self.lina.character.needs.thirst = 80
 
         self.advance_decisions()
 
         self.assertEqual(
-            self.lina.decision,
+            self.lina.mind.decision,
             CharacterDecision.SEEK_WATER
         )
 
     def test_low_energy_prioritizes_rest(self):
-        self.adam.needs.energy = 20
+        self.adam.character.needs.energy = 20
 
         self.advance_decisions()
 
         self.assertEqual(
-            self.adam.decision,
+            self.adam.mind.decision,
             CharacterDecision.REST
         )
 
@@ -69,12 +69,12 @@ class TestDecisionSystem(unittest.TestCase):
         decision_system.update(5)
 
         self.assertEqual(
-            self.adam.decision,
+            self.adam.mind.decision,
             CharacterDecision.WORK
         )
 
         self.assertEqual(
-            self.adam.state,
+            self.adam.character.state,
             CharacterState.IDLE
         )
 

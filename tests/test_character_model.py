@@ -5,7 +5,6 @@ from two_souls.world.resource_type import ResourceType
 from two_souls.world.character import Character
 from two_souls.world.position import Position
 from two_souls.world.needs import Needs
-from two_souls.world.personality import Personality
 from two_souls.world.character_state import CharacterState
 
 
@@ -19,8 +18,9 @@ class TestCharacterModel(unittest.TestCase):
         )
 
         self.assertIsInstance(character.needs, Needs)
-        self.assertIsInstance(character.personality, Personality)
         self.assertEqual(character.state, CharacterState.IDLE)
+        self.assertFalse(hasattr(character, "personality"))
+        self.assertFalse(hasattr(character, "decision"))
 
     def test_characters_have_independent_needs(self):
         adam = Character("adam-001", "Adam", Position(10, 20))
@@ -31,22 +31,9 @@ class TestCharacterModel(unittest.TestCase):
         self.assertEqual(adam.needs.hunger, 80)
         self.assertEqual(lina.needs.hunger, 0)
 
-    def test_characters_have_independent_personalities(self):
-        adam = Character("adam-001", "Adam", Position(10, 20))
-        lina = Character("lina-001", "Lina", Position(15, 25))
-
-        adam.personality.sociability = 90
-
-        self.assertEqual(adam.personality.sociability, 90)
-        self.assertEqual(lina.personality.sociability, 50)
-
     def test_needs_reject_invalid_values(self):
         with self.assertRaises(ValueError):
             Needs(hunger=120)
-
-    def test_personality_rejects_invalid_values(self):
-        with self.assertRaises(ValueError):
-            Personality(kindness=-10)
 
     def test_character_state_can_change(self):
         character = Character(
@@ -66,11 +53,6 @@ class TestCharacterModel(unittest.TestCase):
             needs.hunger = 150
 
 
-    def test_personality_rejects_invalid_updates(self):
-        personality = Personality()
-
-        with self.assertRaises(ValueError):
-            personality.kindness = -10
     def test_characters_have_independent_inventories(self):
         adam = Character(
             character_id="adam",

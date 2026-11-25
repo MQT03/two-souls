@@ -15,12 +15,13 @@ class TestActionSystem(unittest.TestCase):
         self.session = create_new_game()
         self.world = self.session.world
 
-        self.adam = self.world.get_character("adam-001")
+        self.adam_agent = self.world.get_agent("adam-001")
+        self.adam = self.adam_agent.character
         self.event_bus = EventBus()
         self.action_system = ActionSystem(self.world, self.event_bus)
 
     def test_work_decision_starts_work_action(self):
-        self.adam.decision = CharacterDecision.WORK
+        self.adam_agent.mind.decision = CharacterDecision.WORK
 
         self.action_system.update(1)
 
@@ -32,7 +33,7 @@ class TestActionSystem(unittest.TestCase):
         self.assertIsNotNone(self.adam.current_action)
 
     def test_action_progresses_each_tick(self):
-        self.adam.decision = CharacterDecision.WORK
+        self.adam_agent.mind.decision = CharacterDecision.WORK
 
         self.action_system.update(1)
         self.action_system.update(2)
@@ -53,7 +54,7 @@ class TestActionSystem(unittest.TestCase):
         self.assertTrue(action.is_complete)
 
     def test_completed_action_returns_character_to_idle(self):
-        self.adam.decision = CharacterDecision.SEEK_FOOD
+        self.adam_agent.mind.decision = CharacterDecision.SEEK_FOOD
 
         for tick in range(1, 31):
             self.action_system.update(tick)
@@ -68,10 +69,10 @@ class TestActionSystem(unittest.TestCase):
         )
 
     def test_changed_decision_replaces_current_action(self):
-        self.adam.decision = CharacterDecision.WORK
+        self.adam_agent.mind.decision = CharacterDecision.WORK
         self.action_system.update(1)
 
-        self.adam.decision = CharacterDecision.REST
+        self.adam_agent.mind.decision = CharacterDecision.REST
         self.action_system.update(2)
 
         self.assertEqual(
@@ -85,10 +86,10 @@ class TestActionSystem(unittest.TestCase):
         )
 
     def test_idle_decision_clears_current_action(self):
-        self.adam.decision = CharacterDecision.WORK
+        self.adam_agent.mind.decision = CharacterDecision.WORK
         self.action_system.update(1)
 
-        self.adam.decision = CharacterDecision.IDLE
+        self.adam_agent.mind.decision = CharacterDecision.IDLE
         self.action_system.update(2)
 
         self.assertIsNone(self.adam.current_action)
@@ -102,7 +103,7 @@ class TestActionSystem(unittest.TestCase):
             self.session.engine.advance_tick()
 
         self.assertEqual(
-            self.adam.decision,
+            self.adam_agent.mind.decision,
             CharacterDecision.WORK
         )
 
@@ -147,7 +148,7 @@ class TestActionSystem(unittest.TestCase):
             self.session.engine.advance_tick()
 
         self.assertEqual(
-            self.adam.decision,
+            self.adam_agent.mind.decision,
             CharacterDecision.SEEK_FOOD
         )
 
@@ -162,7 +163,7 @@ class TestActionSystem(unittest.TestCase):
         )
         
     def test_completed_action_does_not_restart_without_new_decision(self):
-        self.adam.decision = CharacterDecision.SEEK_FOOD
+        self.adam_agent.mind.decision = CharacterDecision.SEEK_FOOD
 
         for tick in range(1, 31):
             self.action_system.update(tick)
@@ -184,7 +185,7 @@ class TestActionSystem(unittest.TestCase):
         )
         
     def test_completed_action_restarts_after_new_decision_evaluation(self):
-        self.adam.decision = CharacterDecision.WORK
+        self.adam_agent.mind.decision = CharacterDecision.WORK
 
         self.adam.current_action = CharacterAction(
             decision=CharacterDecision.WORK,
@@ -206,7 +207,7 @@ class TestActionSystem(unittest.TestCase):
         self.action_system.update(6)
 
         self.assertEqual(
-            self.adam.decision,
+            self.adam_agent.mind.decision,
             CharacterDecision.WORK
         )
 
@@ -226,7 +227,7 @@ class TestActionSystem(unittest.TestCase):
         )
         
     def test_evaluations_during_action_do_not_restart_completed_action(self):
-        self.adam.decision = CharacterDecision.WORK
+        self.adam_agent.mind.decision = CharacterDecision.WORK
 
         decision_system = DecisionSystem(self.world)
 
@@ -235,7 +236,7 @@ class TestActionSystem(unittest.TestCase):
         self.adam.current_action = CharacterAction(
             decision=CharacterDecision.WORK,
             duration_ticks=1,
-            decision_revision=self.adam.decision_revision
+            decision_revision=self.adam_agent.mind.decision_revision
         )
 
         decision_system.update(2)
@@ -279,8 +280,8 @@ class TestActionSystem(unittest.TestCase):
             received_events.append
         )
 
-        self.adam.decision = CharacterDecision.WORK
-        self.adam.decision_revision = 1
+        self.adam_agent.mind.decision = CharacterDecision.WORK
+        self.adam_agent.mind.decision_revision = 1
 
         self.action_system.update(1)
 
@@ -306,8 +307,8 @@ class TestActionSystem(unittest.TestCase):
             received_events.append
         )
 
-        self.adam.decision = CharacterDecision.WORK
-        self.adam.decision_revision = 1
+        self.adam_agent.mind.decision = CharacterDecision.WORK
+        self.adam_agent.mind.decision_revision = 1
 
         for tick in range(1, 150):
             self.action_system.update(tick)
@@ -323,14 +324,14 @@ class TestActionSystem(unittest.TestCase):
             received_events.append
         )
 
-        self.adam.decision = CharacterDecision.WORK
-        self.adam.decision_revision = 1
+        self.adam_agent.mind.decision = CharacterDecision.WORK
+        self.adam_agent.mind.decision_revision = 1
 
         self.action_system.update(1)
         self.action_system.update(2)
 
-        self.adam.decision = CharacterDecision.REST
-        self.adam.decision_revision += 1
+        self.adam_agent.mind.decision = CharacterDecision.REST
+        self.adam_agent.mind.decision_revision += 1
 
         self.action_system.update(3)
 
@@ -345,8 +346,8 @@ class TestActionSystem(unittest.TestCase):
             received_events.append
         )
 
-        self.adam.decision = CharacterDecision.SOCIALIZE
-        self.adam.decision_revision = 1
+        self.adam_agent.mind.decision = CharacterDecision.SOCIALIZE
+        self.adam_agent.mind.decision_revision = 1
 
         self.action_system.update(40)
 

@@ -3,7 +3,7 @@
 
 ## 1. Project Overview
 
-Two Souls is an autonomous living world simulation where characters live, interact, make decisions, and develop relationships independently of the player.
+Two Souls is an autonomous living world simulation where agents live, interact, make decisions, and develop relationships independently of the player.
 
 The world continues to evolve even when the game is closed. Its state is updated based on elapsed real-world time when the game is reopened.
 
@@ -43,16 +43,18 @@ Responsibilities include:
 
 ### 3.3 Intelligence System
 
-Responsible for autonomous character decision-making.
+Provides cognitive state for each Agent and, in later stages, autonomous decision-making.
 
-Initial approach:
+The AgentMind is the owner of:
 
-- Rule-based decision-making.
-- Utility-based decision-making.
-- Goals and priorities.
-- Needs evaluation.
-- Memory-based decisions.
-- Personality modifiers.
+- Personality traits, values, and motivations.
+- Emotions and preferences.
+- Knowledge, beliefs, and memories.
+- Learned skills and the current decision state.
+
+Traits are typed data defined independently from their per-agent values. Traits can use boolean, integer, floating-point, or string values, with optional numeric bounds. A trait can influence future evaluation but does not directly cause an action. Beliefs represent an agent's confidence in a proposition and may be incorrect; motivations describe drives rather than fixed goals.
+
+AgentMind contains state, not a reasoning engine. It does not receive the World object; future perception and knowledge systems will supply controlled observations.
 
 The system must provide explainable decisions and must not depend on external AI services.
 
@@ -62,11 +64,21 @@ Represents the actual state of the simulated world.
 
 It includes:
 
-- Characters.
+- Agents and their physical Characters.
 - Locations and environment.
 - Resources and inventory.
 - Crops and farming activities.
 - Relationships and world state.
+
+#### Agent Core and Ownership
+
+`World` stores and retrieves `Agent` aggregates. An Agent is the autonomous entity and owns exactly one Character and one AgentMind. Its identity is the Character's ID.
+
+Character contains physical and bodily state: name, position, needs, inventory, activity state, and action progress. AgentMind contains cognitive state. Learned skills stay with the mind, while physical capabilities and equipment belong with the body when those models are introduced. This boundary keeps physical simulation and cognition distinct while allowing systems to coordinate through an Agent.
+
+Agents can be created from an `AgentProfile` using `AgentFactory`. Profiles describe initial physical and cognitive state; they do not prescribe a profession, goals, or life path. The factory copies mutable profile state so newly created Agents do not share inventories, needs, traits, or mind collections.
+
+For compatibility with older callers, `World.characters` is a read-only tuple projection of the Characters owned by its Agents. `add_character` and `get_character` are also compatibility adapters; they do not maintain a separate Character collection. New code should use `add_agent`, `get_agent`, and `agents`.
 
 ### 3.5 Persistence Layer
 
@@ -108,8 +120,8 @@ The simulation must support two operating scenarios:
 When the game is running:
 
 - The simulation advances.
-- Characters evaluate their needs and goals.
-- Characters make decisions and perform actions.
+- Agents evaluate their needs and cognitive state.
+- Agents select decisions and their Characters perform physical actions.
 - World events are generated.
 - The presentation layer displays the updated world.
 

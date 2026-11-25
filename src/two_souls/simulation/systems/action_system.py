@@ -1,10 +1,10 @@
 
 from two_souls.simulation.system import SimulationSystem
 from two_souls.world.character_action import CharacterAction
+from two_souls.world.agent import Agent
 from two_souls.world.character_decision import CharacterDecision
 from two_souls.world.character_state import CharacterState
 from two_souls.world.world import World
-from two_souls.world.character import Character
 from two_souls.events.event_bus import EventBus
 from two_souls.events.character_events import CharacterActionCompleted
 
@@ -37,11 +37,13 @@ class ActionSystem(SimulationSystem):
         self._event_bus = event_bus
 
     def update(self, tick: int) -> None:
-        for character in self._world.characters:
-            self._update_character(character, tick)
+        for agent in self._world.agents:
+            self._update_agent(agent, tick)
 
-    def _update_character(self, character: Character,tick: int) -> None:
-        decision = character.decision
+    def _update_agent(self, agent: Agent, tick: int) -> None:
+        character = agent.character
+        mind = agent.mind
+        decision = mind.decision
         action = character.current_action
 
         if decision == CharacterDecision.IDLE:
@@ -54,7 +56,7 @@ class ActionSystem(SimulationSystem):
             or action.decision != decision
             or (
                 action.is_complete
-                and character.decision_revision > action.decision_revision
+                and mind.decision_revision > action.decision_revision
             )
         )
 
@@ -64,7 +66,7 @@ class ActionSystem(SimulationSystem):
             action = CharacterAction(
                 decision=decision,
                 duration_ticks=duration,
-                decision_revision=character.decision_revision
+                decision_revision=mind.decision_revision
             )
 
             character.current_action = action
@@ -75,7 +77,7 @@ class ActionSystem(SimulationSystem):
             return
 
         if action.advance():
-            action.decision_revision = character.decision_revision
+            action.decision_revision = mind.decision_revision
             character.state = CharacterState.IDLE
 
             self._event_bus.publish(

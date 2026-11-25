@@ -16,26 +16,27 @@ class TestGameSession(unittest.TestCase):
         self.assertIsInstance(self.session, GameSession)
 
     def test_creates_adam_and_lina(self):
-        adam = self.session.world.get_character("adam-001")
-        lina = self.session.world.get_character("lina-001")
+        adam = self.session.world.get_agent("adam-001")
+        lina = self.session.world.get_agent("lina-001")
 
         self.assertIsNotNone(adam)
         self.assertIsNotNone(lina)
 
-        self.assertEqual(adam.name, "Adam")
-        self.assertEqual(lina.name, "Lina")
+        self.assertEqual(adam.character.name, "Adam")
+        self.assertEqual(lina.character.name, "Lina")
+        self.assertIsNotNone(adam.mind.personality)
 
     def test_simulation_engine_starts_at_zero(self):
         self.assertEqual(self.session.engine.tick_count, 0)
 
     def test_simulation_updates_both_characters(self):
-        adam = self.session.world.get_character("adam-001")
-        lina = self.session.world.get_character("lina-001")
+        adam = self.session.world.get_agent("adam-001")
+        lina = self.session.world.get_agent("lina-001")
 
         self.session.engine.advance_tick()
 
-        self.assertAlmostEqual(adam.needs.hunger, 0.05)
-        self.assertAlmostEqual(lina.needs.hunger, 0.05)
+        self.assertAlmostEqual(adam.character.needs.hunger, 0.05)
+        self.assertAlmostEqual(lina.character.needs.hunger, 0.05)
         
     def test_runner_advances_session_engine(self):
         ticks = self.session.runner.update(1.0)

@@ -16,7 +16,8 @@ class NeedsSystem(SimulationSystem):
         self._world = world
 
     def update(self, tick: int) -> None:
-        for character in self._world.characters:
+        for agent in self._world.agents:
+            character = agent.character
             needs = character.needs
 
             needs.hunger = min(
