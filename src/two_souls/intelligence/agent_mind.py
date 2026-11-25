@@ -1,5 +1,6 @@
 from dataclasses import dataclass, field
 
+from two_souls.intelligence.observation import Observation
 from two_souls.intelligence.personality import Personality
 from two_souls.world.character_decision import CharacterDecision
 
@@ -67,3 +68,27 @@ class AgentMind:
     skills: dict[str, Skill] = field(default_factory=dict)
     decision: CharacterDecision = CharacterDecision.IDLE
     decision_revision: int = 0
+    _observations: list[Observation] = field(
+        default_factory=list,
+        init=False,
+        repr=False,
+    )
+    _observation_ids: set[str] = field(
+        default_factory=set,
+        init=False,
+        repr=False,
+    )
+
+    @property
+    def observations(self) -> tuple[Observation, ...]:
+        return tuple(self._observations)
+
+    def receive_observation(self, observation: Observation) -> bool:
+        if not isinstance(observation, Observation):
+            raise TypeError("AgentMind can only receive Observation instances.")
+        if observation.observation_id in self._observation_ids:
+            return False
+
+        self._observation_ids.add(observation.observation_id)
+        self._observations.append(observation)
+        return True

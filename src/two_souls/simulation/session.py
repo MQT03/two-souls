@@ -7,6 +7,7 @@ from two_souls.simulation.runner import SimulationRunner
 from two_souls.simulation.systems.action_system import ActionSystem
 from two_souls.simulation.systems.decision_system import DecisionSystem
 from two_souls.simulation.systems.needs_system import NeedsSystem
+from two_souls.simulation.systems.perception_system import PerceptionSystem
 from two_souls.intelligence.agent_mind import Motivation, Value
 from two_souls.intelligence.personality import (
     TraitDefinition,
@@ -79,6 +80,7 @@ def create_new_game() -> GameSession:
     world.add_agent(lina)
 
     engine = SimulationEngine()
+    perception_system = PerceptionSystem(world, event_bus)
 
     engine.add_system(NeedsSystem(world))
     engine.add_system(
@@ -86,6 +88,10 @@ def create_new_game() -> GameSession:
         update_interval=5
     )
     engine.add_system(ActionSystem(world, event_bus))
+    engine.add_system(
+        perception_system,
+        update_interval=PerceptionSystem.PERIODIC_INTERVAL,
+    )
 
     runner = SimulationRunner(
         engine=engine,
